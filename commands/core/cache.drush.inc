@@ -261,6 +261,9 @@ function drush_cache_clear_drush() {
  * it also clears drush cache and drupal render cache.
  */
 function drush_cache_rebuild() {
+  $cache_directory = '/dev/shm/drush_files';
+  unlink($cache_directory);
+
   if (!drush_get_option('cache-clear', TRUE)) {
     drush_log(dt("Skipping cache-clear operation due to --cache-clear=0 option."), LogLevel::OK);
     return TRUE;
