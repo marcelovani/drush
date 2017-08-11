@@ -247,16 +247,21 @@ function drush_cache_clear_types($include_bootstrapped_types = FALSE) {
  * Clear caches internal to drush core.
  */
 function drush_cache_clear_drush() {
-  if (file_exists('/dev/shm')) {
-    $dir = '/dev/shm';
+  $tmp_dirs = array(
+    '/dev/shm',
+    '/tmp'
+  );
+  foreach ($tmp_dirs as $key => $dir) {
+    if (file_exists($dir)) {
+      $cache_directory = $dir . '/drush_files';
+      break;
+    }
   }
-  else {
-    $dir = '/tmp';
+  if (file_exists($cache_directory)) {
+    echo 'Clear ' . $cache_directory;
+    array_map('unlink', glob($cache_directory . "/*"));
+    rmdir($cache_directory);
   }
-  $cache_directory = $dir . '/drush_files';
-  echo 'Clear ' . $cache_directory;
-  array_map('unlink', glob($cache_directory."/*"));
-  rmdir($cache_directory);
 
   drush_cache_clear_all(NULL, 'default'); // commandfiles, etc.
   drush_cache_clear_all(NULL, 'complete'); // completion
