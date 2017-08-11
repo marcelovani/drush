@@ -650,23 +650,46 @@ function drush_file_not_empty($file_to_test) {
  * @return array|mixed
  */
 function drush_scan_directory($dir, $mask, $nomask = array('.', '..', 'CVS'), $callback = 0, $recurse_max_depth = TRUE, $key = 'filename', $min_depth = 0, $include_dot_files = FALSE, $depth = 0) {
-  $cache_directory = '/dev/shm/drush_files';
+  //echo 'Find ' . $mask . PHP_EOL;
+
+ // if (strpos($mask, 'home') !== FALSE) {
+    return drush_scan_directory_no_cache($dir, $mask, $nomask, $callback, $recurse_max_depth, $key, $min_depth, $include_dot_files, $depth);
+ // }
+
+
+  if (file_exists('/dev/shm')) {
+    $dir = '/dev/shm';
+  }
+  else {
+    $dir = '/tmp';
+  }
+  $cache_directory = $dir . '/drush_files';
 
   if (!file_exists($cache_directory)) {
     mkdir($cache_directory);
   }
 
-  $cache_file = $cache_directory . '/' . md5($mask . $nomask . $key);
+  $args = func_get_args();
+  $args[2] = implode('.', $args[2]);
+  //unset($args[0]);
+  $cid = implode('.', $args);
+  $cid = md5($cid);
+
+  $cache_file = $cache_directory . '/' . $cid;
+
   if (file_exists($cache_file)) {
     $content = file_get_contents($cache_file);
     $unserialized = unserialize($content);
     if (is_array($unserialized)) {
+      echo 'From cache ' . $dir . $mask . PHP_EOL;
       return $unserialized;
     }
     else {
       echo 'Cache is invalid';
     }
   }
+
+  //echo 'From scan ' . $dir . $mask . PHP_EOL;
 
   $files = drush_scan_directory_no_cache($dir, $mask, $nomask, $callback, $recurse_max_depth, $key, $min_depth, $include_dot_files, $depth);
 

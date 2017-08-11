@@ -247,6 +247,17 @@ function drush_cache_clear_types($include_bootstrapped_types = FALSE) {
  * Clear caches internal to drush core.
  */
 function drush_cache_clear_drush() {
+  if (file_exists('/dev/shm')) {
+    $dir = '/dev/shm';
+  }
+  else {
+    $dir = '/tmp';
+  }
+  $cache_directory = $dir . '/drush_files';
+  echo 'Clear ' . $cache_directory;
+  array_map('unlink', glob($cache_directory."/*"));
+  rmdir($cache_directory);
+
   drush_cache_clear_all(NULL, 'default'); // commandfiles, etc.
   drush_cache_clear_all(NULL, 'complete'); // completion
   // Release XML. We don't clear tarballs since those never change.
@@ -261,9 +272,6 @@ function drush_cache_clear_drush() {
  * it also clears drush cache and drupal render cache.
  */
 function drush_cache_rebuild() {
-  $cache_directory = '/dev/shm/drush_files';
-  unlink($cache_directory);
-
   if (!drush_get_option('cache-clear', TRUE)) {
     drush_log(dt("Skipping cache-clear operation due to --cache-clear=0 option."), LogLevel::OK);
     return TRUE;
