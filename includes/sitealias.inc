@@ -609,7 +609,8 @@ function _drush_sitealias_find_and_load_all_aliases() {
  */
 function _drush_sitealias_find_alias_files($aliasname = NULL, $alias_path_context = NULL) {
   // Get from cache
-  if ($alias_files_to_consider = drush_get_from_cache(__FUNCTION__.$aliasname.$alias_path_context)) {
+  $cid = __FUNCTION__.$aliasname.$alias_path_context;
+  if ($alias_files_to_consider = drush_get_from_cache($cid)) {
     return $alias_files_to_consider;
   }
 
@@ -642,7 +643,7 @@ function _drush_sitealias_find_alias_files($aliasname = NULL, $alias_path_contex
     }
   }
   // Write on cache
-  drush_write_cache(__FUNCTION__, $alias_files_to_consider);
+  drush_write_cache($cid, $alias_files_to_consider);
 
   return $alias_files_to_consider;
 }
