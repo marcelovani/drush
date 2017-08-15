@@ -272,7 +272,14 @@ function drush_get_cache_directory() {
  * @param $default
  */
 function drush_write_cache($cid, $value) {
-  $cache_file = drush_get_cache_directory() . '/' . $cid;
+
+  $cache_directory = drush_get_cache_directory();
+
+  if (file_exists($cache_directory)) {
+    mkdir($cache_directory);
+  }
+
+  $cache_file = $cache_directory . '/' . $cid;
 
   file_put_contents($cache_file, serialize($value));
 
