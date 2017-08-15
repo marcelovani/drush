@@ -650,12 +650,11 @@ function drush_file_not_empty($file_to_test) {
  * @return array|mixed
  */
 function drush_scan_directory($dir, $mask, $nomask = array('.', '..', 'CVS'), $callback = 0, $recurse_max_depth = TRUE, $key = 'filename', $min_depth = 0, $include_dot_files = FALSE, $depth = 0) {
-  //echo 'Find ' . $mask . PHP_EOL;
 
- // if (strpos($mask, 'home') !== FALSE) {
+  if (strpos($mask, 'home') !== FALSE) {
     return drush_scan_directory_no_cache($dir, $mask, $nomask, $callback, $recurse_max_depth, $key, $min_depth, $include_dot_files, $depth);
- // }
-
+  }
+  echo 'Find ' . $mask . PHP_EOL;
 
   if (file_exists('/dev/shm')) {
     $dir = '/dev/shm';
