@@ -609,7 +609,7 @@ function _drush_sitealias_find_and_load_all_aliases() {
  */
 function _drush_sitealias_find_alias_files($aliasname = NULL, $alias_path_context = NULL) {
   // Get from cache
-  if ($alias_files_to_consider = drush_get_from_cache(__FUNCTION__)) {
+  if ($alias_files_to_consider = drush_get_from_cache(__FUNCTION__.$aliasname.$alias_path_context)) {
     return $alias_files_to_consider;
   }
 
