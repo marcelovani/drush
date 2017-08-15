@@ -306,7 +306,7 @@ function drush_get_from_cache($cid) {
  * Clear caches internal to drush core.
  */
 function drush_cache_clear_drush() {
-  $cache_directory = drush_get_cache_storage();
+  $cache_directory = drush_get_cache_directory();
   if (file_exists($cache_directory)) {
     echo 'Clear ' . $cache_directory;
     array_map('unlink', glob($cache_directory . "/*"));
