@@ -244,19 +244,69 @@ function drush_cache_clear_types($include_bootstrapped_types = FALSE) {
 }
 
 /**
- * Clear caches internal to drush core.
+ * Helper to try some cache locations.
+ *
+ * @return string
+ * @throws Exception
  */
-function drush_cache_clear_drush() {
+function drush_get_cache_directory() {
   $tmp_dirs = array(
     '/dev/shm',
     '/tmp'
   );
   foreach ($tmp_dirs as $key => $dir) {
     if (file_exists($dir)) {
-      $cache_directory = $dir . '/drush_files';
+      return $dir . '/drush_files';
       break;
     }
   }
+
+  throw new \Exception("Cache cannot write on /tmp");
+}
+
+
+/**
+ * Write values to cache.
+ *
+ * @param $cid
+ * @param $default
+ */
+function drush_write_cache($cid, $value) {
+  $cache_file = drush_get_cache_directory() . '/' . $cid;
+
+  file_put_contents($cache_file, serialize($value));
+
+  echo 'Wrote on cache ' . $cache_file . PHP_EOL;
+}
+
+/**
+ * Loads values from cache.
+ *
+ * @param $cid
+ */
+function drush_get_from_cache($cid) {
+  $value = NULL;
+
+  $cache_file = drush_get_cache_directory() . '/' . $cid;
+
+  if (file_exists($cache_file)) {
+    $content = file_get_contents($cache_file);
+    $unserialized = unserialize($content);
+    if (is_array($unserialized)) {
+      $value = $unserialized;
+    }
+  }
+
+  echo 'Read from cache ' . $cache_file . PHP_EOL;
+
+  return $value;
+}
+
+/**
+ * Clear caches internal to drush core.
+ */
+function drush_cache_clear_drush() {
+  $cache_directory = drush_get_cache_storage();
   if (file_exists($cache_directory)) {
     echo 'Clear ' . $cache_directory;
     array_map('unlink', glob($cache_directory . "/*"));

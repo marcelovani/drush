@@ -106,6 +106,11 @@ function _drush_sitealias_alias_list() {
  * is the site specification for that site.
  */
 function _drush_sitealias_site_list() {
+  // Get from cache
+  if ($site_list = drush_get_from_cache(__FUNCTION__)) {
+    return $site_list;
+  }
+
   $site_list = array();
   $base_path = drush_get_context('DRUSH_DRUPAL_ROOT');
   if ($base_path) {
@@ -120,6 +125,10 @@ function _drush_sitealias_site_list() {
       }
     }
   }
+
+  // Write on cache
+  drush_write_cache(__FUNCTION__, $site_list);
+
   return $site_list;
 }
 

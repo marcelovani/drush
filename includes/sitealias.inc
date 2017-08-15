@@ -608,8 +608,12 @@ function _drush_sitealias_find_and_load_all_aliases() {
  * that match the requested alias name.
  */
 function _drush_sitealias_find_alias_files($aliasname = NULL, $alias_path_context = NULL) {
-  $alias_files_to_consider = array();
+  // Get from cache
+  if ($alias_files_to_consider = drush_get_from_cache(__FUNCTION__)) {
+    return $alias_files_to_consider;
+  }
 
+  $alias_files_to_consider = array();
   // The alias path is a list of folders to search for alias settings files
   $alias_path = drush_sitealias_alias_path($alias_path_context);
 
@@ -637,6 +641,8 @@ function _drush_sitealias_find_alias_files($aliasname = NULL, $alias_path_contex
       $alias_files_to_consider = array_merge($alias_files_to_consider, array_keys(drush_scan_directory($path, $file_pattern_to_search_for, $blacklist, 0, TRUE)));
     }
   }
+  // Write on cache
+  drush_write_cache(__FUNCTION__, $alias_files_to_consider);
 
   return $alias_files_to_consider;
 }

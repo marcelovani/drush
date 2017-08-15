@@ -636,69 +636,6 @@ function drush_file_not_empty($file_to_test) {
 }
 
 /**
- * Wrapper for drush_scan_directory_no_cache()
- * @param        $dir
- * @param        $mask
- * @param array  $nomask
- * @param int    $callback
- * @param bool   $recurse_max_depth
- * @param string $key
- * @param int    $min_depth
- * @param bool   $include_dot_files
- * @param int    $depth
- *
- * @return array|mixed
- */
-function drush_scan_directory($dir, $mask, $nomask = array('.', '..', 'CVS'), $callback = 0, $recurse_max_depth = TRUE, $key = 'filename', $min_depth = 0, $include_dot_files = FALSE, $depth = 0) {
-
-  // Allow scanning on home. Otherwise it breaks registry_rebuild.
-  if (strpos($mask, 'home') == FALSE) {
-    return drush_scan_directory_no_cache($dir, $mask, $nomask, $callback, $recurse_max_depth, $key, $min_depth, $include_dot_files, $depth);
-  }
-  //echo 'Find ' . $mask . PHP_EOL;
-
-  if (file_exists('/dev/shm')) {
-    $dir = '/dev/shm';
-  }
-  else {
-    $dir = '/tmp';
-  }
-  $cache_directory = $dir . '/drush_files';
-
-  if (!file_exists($cache_directory)) {
-    mkdir($cache_directory);
-  }
-
-  $args = func_get_args();
-  $args[2] = implode('.', $args[2]);
-  //unset($args[0]);
-  $cid = implode('.', $args);
-  $cid = md5($cid);
-
-  $cache_file = $cache_directory . '/' . $cid;
-
-  if (file_exists($cache_file)) {
-    $content = file_get_contents($cache_file);
-    $unserialized = unserialize($content);
-    if (is_array($unserialized)) {
-      //echo 'From cache ' . $dir . $mask . PHP_EOL;
-      return $unserialized;
-    }
-    else {
-      echo 'Cache is invalid';
-    }
-  }
-
-  //echo 'From scan ' . $dir . $mask . PHP_EOL;
-
-  $files = drush_scan_directory_no_cache($dir, $mask, $nomask, $callback, $recurse_max_depth, $key, $min_depth, $include_dot_files, $depth);
-
-  file_put_contents($cache_file, serialize($files));
-
-  return $files;
-}
-
-/**
  * Finds all files that match a given mask in a given directory.
  * Directories and files beginning with a period are excluded; this
  * prevents hidden files and directories (such as SVN working directories
@@ -738,7 +675,15 @@ function drush_scan_directory($dir, $mask, $nomask = array('.', '..', 'CVS'), $c
  *   "path", "basename", and "name" members corresponding to the
  *   matching files.
  */
-function drush_scan_directory_no_cache($dir, $mask, $nomask = array('.', '..', 'CVS'), $callback = 0, $recurse_max_depth = TRUE, $key = 'filename', $min_depth = 0, $include_dot_files = FALSE, $depth = 0) {
+function drush_scan_directory($dir, $mask, $nomask = array('.', '..', 'CVS'), $callback = 0, $recurse_max_depth = TRUE, $key = 'filename', $min_depth = 0, $include_dot_files = FALSE, $depth = 0) {
+  $list = debug_backtrace();
+  $referer = $list[1];
+  static $prev_referer;
+  if (!isset($prev_referer)) {
+    echo 'Find ' . $mask . '(' . $referer['function'] . ')' . PHP_EOL;
+    $prev_referer =  $referer['function'];
+  }
+
   $key = (in_array($key, array('filename', 'basename', 'name')) ? $key : 'filename');
   $files = array();
 
@@ -749,7 +694,7 @@ function drush_scan_directory_no_cache($dir, $mask, $nomask = array('.', '..', '
       if (!in_array($file, $nomask) && (($include_dot_files && (!preg_match("/\.\+/",$file))) || ($file[0] != '.'))) {
         if (is_dir("$dir/$file") && (($recurse_max_depth === TRUE) || ($depth < $recurse_max_depth))) {
           // Give priority to files in this folder by merging them in after any subdirectory files.
-          $files = array_merge(drush_scan_directory_no_cache("$dir/$file", $mask, $nomask, $callback, $recurse_max_depth, $key, $min_depth, $include_dot_files, $depth + 1), $files);
+          $files = array_merge(drush_scan_directory("$dir/$file", $mask, $nomask, $callback, $recurse_max_depth, $key, $min_depth, $include_dot_files, $depth + 1), $files);
         }
         elseif ($depth >= $min_depth && preg_match($mask, $file)) {
           // Always use this match over anything already set in $files with the same $$key.
