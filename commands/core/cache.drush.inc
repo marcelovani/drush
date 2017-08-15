@@ -304,7 +304,12 @@ function drush_get_from_cache($cid) {
     }
   }
 
-  echo 'Read from cache ' . $cache_file . PHP_EOL;
+  if (!empty($value)) {
+    echo 'Read from cache ' . $cache_file . PHP_EOL;
+  }
+  else {
+    echo 'Cache empty ' . $cache_file . PHP_EOL;
+  }
 
   return $value;
 }
