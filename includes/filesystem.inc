@@ -651,10 +651,11 @@ function drush_file_not_empty($file_to_test) {
  */
 function drush_scan_directory($dir, $mask, $nomask = array('.', '..', 'CVS'), $callback = 0, $recurse_max_depth = TRUE, $key = 'filename', $min_depth = 0, $include_dot_files = FALSE, $depth = 0) {
 
-  if (strpos($mask, 'home') !== FALSE) {
+  // Allow scanning on home. Otherwise it breaks registry_rebuild.
+  if (strpos($mask, 'home') == FALSE) {
     return drush_scan_directory_no_cache($dir, $mask, $nomask, $callback, $recurse_max_depth, $key, $min_depth, $include_dot_files, $depth);
   }
-  echo 'Find ' . $mask . PHP_EOL;
+  //echo 'Find ' . $mask . PHP_EOL;
 
   if (file_exists('/dev/shm')) {
     $dir = '/dev/shm';
@@ -680,7 +681,7 @@ function drush_scan_directory($dir, $mask, $nomask = array('.', '..', 'CVS'), $c
     $content = file_get_contents($cache_file);
     $unserialized = unserialize($content);
     if (is_array($unserialized)) {
-      echo 'From cache ' . $dir . $mask . PHP_EOL;
+      //echo 'From cache ' . $dir . $mask . PHP_EOL;
       return $unserialized;
     }
     else {
