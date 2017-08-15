@@ -275,7 +275,7 @@ function drush_write_cache($cid, $value) {
 
   $cache_directory = drush_get_cache_directory();
 
-  if (file_exists($cache_directory)) {
+  if (!file_exists($cache_directory)) {
     mkdir($cache_directory);
   }
 
