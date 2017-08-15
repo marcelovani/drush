@@ -9,4 +9,7 @@
  */
 
 require __DIR__ . '/includes/preflight.inc';
-exit(drush_main());
+require '/vagrant/repos/3d_debugger/vendor/marcelovani/xhprof/includes/xhprof_start.php';
+drush_main();
+require '/vagrant/repos/3d_debugger/vendor/marcelovani/xhprof/includes/xhprof_end.php';
+exit;
