@@ -683,7 +683,7 @@ function drush_scan_directory($dir, $mask, $nomask = array('.', '..', 'CVS'), $c
     $prev_referer =  $referer['function'];
     $cache_file = drush_get_cache_directory() . '/' . __FUNCTION__;
     if (!file_exists($cache_file)) {
-      echo 'Find ' . $mask . '(' . $referer['function'] . ')' . PHP_EOL;
+      dlm('Find ' . $mask . ' (' . $referer['function'] . ')');
     }
   }
 

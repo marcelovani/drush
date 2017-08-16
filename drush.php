@@ -8,7 +8,6 @@
  * @requires PHP CLI 5.4.5, or newer.
  */
 
-
 /**
  * Helper to try some cache locations.
  *
@@ -30,7 +29,6 @@ function drush_get_cache_directory() {
   throw new \Exception("Cache cannot write on /tmp");
 }
 
-
 /**
  * Write values to cache.
  *
@@ -49,7 +47,7 @@ function drush_write_cache($cid, $value) {
 
   file_put_contents($cache_file, serialize($value));
 
-  echo 'Wrote on cache ' . $cache_file . PHP_EOL;
+  dlm('Wrote on cache ' . $cache_file);
 }
 
 /**
@@ -58,6 +56,11 @@ function drush_write_cache($cid, $value) {
  * @param $cid
  */
 function drush_get_from_cache($cid) {
+  static $static_cache;
+  if (isset($static_cache[__FUNCTION__ . $cid])) {
+    return $static_cache[__FUNCTION__ . $cid];
+  }
+
   $value = NULL;
 
   $cache_file = drush_get_cache_directory() . '/' . $cid;
@@ -71,12 +74,13 @@ function drush_get_from_cache($cid) {
   }
 
   if (!is_null($value)) {
-    echo 'Read from cache ' . $cache_file . PHP_EOL;
+    dlm('Read from cache ' . $cache_file);
   }
   else {
-    echo 'Cache empty ' . $cache_file . PHP_EOL;
+    dlm('Cache empty ' . $cache_file);
   }
 
+  $static_cache[__FUNCTION__ . $cid] = $value;
   return $value;
 }
 
